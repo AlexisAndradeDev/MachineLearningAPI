@@ -27,6 +27,9 @@ class MLModel(models.Model):
         """Supervised / unsupervised"""
         return type_of_model_by_algorithm[self.algorithm]
 
+    def __str__(self):
+        return f'{self.name} - {self.public_id}'
+
     def generate_unique_id(self):
         """
         Generates a unique ID using the current time and the name of the
@@ -43,6 +46,4 @@ class MLModel(models.Model):
     def save(self, *args, **kwargs):
         self.public_id = self.generate_unique_id()
         super(MLModel, self).save()
-
-    def __str__(self):
-        return f'{self.name} - {self.public_id}'
+    
