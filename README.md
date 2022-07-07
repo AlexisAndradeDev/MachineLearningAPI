@@ -75,3 +75,19 @@ create
         JSON data:
         
         Returns the Machine Learning Model as a JSON.
+
+get/<slug:public_id>
+
+    Returns a Machine Learning Model as a JSON.
+
+    GET REQUEST
+
+        JSON data:
+
+        "public_id": string. Required.
+
+    RESPONSE
+
+        JSON data:
+
+        Returns the Machine Learning Model as a JSON.
