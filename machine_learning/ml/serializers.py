@@ -7,6 +7,7 @@ class MLModelSerializer(serializers.ModelSerializer):
         model = MLModel
         fields = [
             'name',
+            'public_id',
             'algorithm',
             'cost_function',
             'epochs',

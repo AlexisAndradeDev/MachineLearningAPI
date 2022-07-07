@@ -72,6 +72,6 @@ create
     
     RESPONSE
     
-        JSON body:
+        JSON data:
         
-        
+        Returns the Machine Learning Model as a JSON.
