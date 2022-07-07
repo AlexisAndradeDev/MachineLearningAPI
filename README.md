@@ -3,21 +3,34 @@ Deep Learning models and Machine Learning functions.
 
 # Architecture
 
-**Modules**
+## Modules
 
 **ml**
-    Machine Learning
+
+Machine Learning
+
     - Supervised Learning
+
     - Cost functions
+
     - Regularization
+
     - Unsupervised learning
 
 **dl**
-    Deep Learning
+
+Deep Learning
+
     - Neural Networks
+
     - Layers
-        - Convolution
+
+        - Convolutions
+
         - Dense
+
         - Max Pool
+
         - Flatten
+
         - Dropout
