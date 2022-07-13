@@ -1,6 +1,41 @@
 import numpy as np
 
-def mean_squared_error(X, y, weights, bias_vector, function_):
+class MachineLearningModel():
+    def __init__(self, func, cost_function):
+        self.func = func # linear, sigmoid, etc.
+        self.cost_function = cost_function # mse, binary-crossentropy, etc.
+        self.weights = None
+        self.bias = None
+    def train(self, X, y, lr, epochs):
+        if self.weights is None:
+            # each column in weights matrix represents a neuron
+            # each row matches a feature of X
+            # num of rows must match num of columns in X
+            # (each column in X represents a feature)
+            num_of_features = X.shape[1]
+            # as it's a ML model, only one neuron will be created
+            num_of_neurons = 1
+            self.weights = np.zeros(
+                (num_of_features, num_of_neurons), dtype='float64',
+            )
+        if self.bias is None:
+            # each element represents a bias of a neuron
+            num_of_neurons = 1
+            self.bias = np.zeros(num_of_neurons, dtype='float64')
+
+        self.weights, self.bias = gradient_descent(
+            X, y, self.weights, self.bias, self.func, lr, epochs
+        )
+    def predict(self, X):
+        return predict(X, self.weights, self.func, bias_vector=self.bias)
+    def cost(self, X, y):
+        if self.cost_function == 'mse':
+            cost = mean_squared_error(
+                X, y, self.weights, self.bias, self.func
+            )
+        return cost
+
+def mean_squared_error(X, y, weights, bias_vector, func):
     """
     Mean Squared Error cost function for layers.
 
@@ -14,18 +49,18 @@ def mean_squared_error(X, y, weights, bias_vector, function_):
             Each column represents a neuron.
         bias_vector (np.array): Bias vector.
             Each element represents a bias.
-        function_ (str): Activation function.
+        func (str): Activation function.
             'linear', 'polynomial', 'sigmoid'.
 
     Returns:
         float: Error.
     """    
     m = len(y)
-    predictions = predict(X, weights, function_, bias_vector=bias_vector)
+    predictions = predict(X, weights, func, bias_vector=bias_vector)
     error = (1/m) * np.sum(np.power(predictions - y, 2))
     return error
 
-def gradient_descent(X, y, layer_weights, bias_vector, function_, lr, epochs):
+def gradient_descent(X, y, layer_weights, bias_vector, func, lr, epochs):
     m = len(y)
     rows, columns = layer_weights.shape[:2]
     X_rows = X.shape[0]
@@ -39,12 +74,9 @@ def gradient_descent(X, y, layer_weights, bias_vector, function_, lr, epochs):
     X = np.insert(X, 0, np.ones(X_rows), 1)
     X_transposed = X.T
 
-    print(f'Weights matrix with bias row:\n{layer_weights}')
-    print(f'X with ones column:\n{X}')
-
     for iteration in range(epochs):
         # vectorized form of gradient descent        
-        layer_weights -= lr * (1/m) * X_transposed.dot(predict(X, layer_weights, function_) - y)
+        layer_weights -= lr * (1/m) * X_transposed.dot(predict(X, layer_weights, func) - y)
 
     # separate bias vector and layer weights
     bias_vector = layer_weights[0,:]
@@ -52,7 +84,7 @@ def gradient_descent(X, y, layer_weights, bias_vector, function_, lr, epochs):
 
     return layer_weights, bias_vector
 
-def predict(X, layer_weights, function_, bias_vector=None):
+def predict(X, layer_weights, func, bias_vector=None):
     """
     Args:
         X (np.array): Input matrix.
@@ -60,7 +92,7 @@ def predict(X, layer_weights, function_, bias_vector=None):
             Each column represents a feature.
         layer_weights (np.array): Layer weights matrix.
             Each column represents a neuron.
-        function_ (str): Activation function.
+        func (str): Activation function.
             'linear', 'polynomial', 'sigmoid'.
         bias_vector (np.array, optional): Bias vector.
             Each element represents a bias.
@@ -71,21 +103,21 @@ def predict(X, layer_weights, function_, bias_vector=None):
         np.ndarray: Prediction.
     """
     # logits
-    if function_ in ['linear', 'polynomial', 'sigmoid']:
+    if func in ['linear', 'polynomial', 'sigmoid']:
         z = np.dot(X, layer_weights)
         if bias_vector:
             z += bias_vector
 
     # prediction
-    if function_ in ['linear', 'polynomial']:
+    if func in ['linear', 'polynomial']:
         prediction = z
-    elif function_ in ['sigmoid']:
+    elif func in ['sigmoid']:
         prediction = 1/(1 + np.e**(-z))
 
     return prediction
 
 if __name__ == '__main__':
-    # TEST:
+    print('\n\n-------- TEST 1.1 Gradient Descent without Machine Learning Model --------\n')
 
     # 1000 USD per square meter # feature 1
     # 5000 USD per bedroom # feature 2
@@ -136,8 +168,8 @@ if __name__ == '__main__':
     X_train[:, 1] /= second_feature_range
 
     # targets
-    y_train_range = np.max(y_train) - np.min(y_train)
-    y_train /= y_train_range
+    y_range = np.max(y_train) - np.min(y_train)
+    y_train /= y_range
 
     # Initialize weights and bias
     layer_weights = np.array([
@@ -155,6 +187,7 @@ if __name__ == '__main__':
     error = mean_squared_error(X_train, y_train, fit_weights, fit_bias, 'linear')
     print(f'Mean Squared Error: {error}')
 
+    # Validation
     X_validation = np.array([
         [10, 8],
         [200, 70],
@@ -163,17 +196,45 @@ if __name__ == '__main__':
         [120, 4],
     ], dtype='float64')
 
-    expected_prediction = predict(
+    y_validation = predict(
         X_validation, target_layer_weights_without_normalization, 
         'linear', bias_vector=target_bias_without_normalization,
     )
-    print(f"Expected prediction:\n{expected_prediction}")
 
+    # Normalization
     X_validation[:, 0] /= first_feature_range
     X_validation[:, 1] /= second_feature_range
+
+    y_validation /= y_range
 
     prediction = predict(X_validation, fit_weights, 'linear', bias_vector=fit_bias)
 
     # remove normalization
-    prediction *= y_train_range
+    prediction *= y_range
+    y_validation_without_normalization = y_validation * y_range
+
+    print(f"Expected prediction:\n{y_validation_without_normalization}")
     print(f"Predicted:\n{prediction}")
+
+
+    print('\n\n-------- TEST 1.2 Machine Learning Model --------\n')
+
+    model = MachineLearningModel('linear', 'mse')
+
+    model.train(X_train, y_train, 0.001, 10000)
+    print(f'Weights after training:\n{model.weights}\nBias after training:\n{model.bias}')
+
+    error = model.cost(X_train, y_train)
+    print(f'Mean Squared Error (train): {error}')
+
+    # Validation
+    prediction = model.predict(X_validation)
+
+    # remove normalization
+    prediction *= y_range
+
+    print(f"Expected prediction:\n{y_validation_without_normalization}")
+    print(f"Predicted:\n{prediction}")
+
+    error = model.cost(X_validation, y_validation)
+    print(f'Mean Squared Error (validation): {error}')
