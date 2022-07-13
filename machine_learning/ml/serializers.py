@@ -8,10 +8,9 @@ class MLModelSerializer(serializers.ModelSerializer):
         fields = [
             'name',
             'public_id',
-            'algorithm',
+            'func',
             'cost_function',
-            'epochs',
-            'lr',
-            'type_of_model',
+            'create_time',
+            'last_modified',
         ]
 

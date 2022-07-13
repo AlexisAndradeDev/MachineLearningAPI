@@ -6,26 +6,14 @@ from django.utils.text import slugify
 
 # Create your models here.
 
-type_of_model_by_algorithm = {
-    "regression": "supervised",
-    "classification": "supervised",
-}
-
 class MLModel(models.Model):
     name = models.CharField(max_length=50, validators=[MinLengthValidator(3)])
     public_id = models.SlugField(unique=True)
-    algorithm = models.CharField(max_length=50)
-    cost_function = models.CharField(null=True, max_length=50)
-    epochs = models.IntegerField(validators=[MinValueValidator(1)])
-    lr = models.FloatField(default=0.001)
+    func = models.CharField(max_length=50) # linear, sigmoid, etc.
+    cost_function = models.CharField(null=True, max_length=50) # mse, binary-crossentropy, etc.
 
-    current_time = models.DateField(auto_now_add=True)
+    create_time = models.DateField(auto_now_add=True)
     last_modified = models.DateField(auto_now=True)
-
-    @property
-    def type_of_model(self):
-        """Supervised / unsupervised"""
-        return type_of_model_by_algorithm[self.algorithm]
 
     def __str__(self):
         return f'{self.name} - {self.public_id}'
